@@ -81,7 +81,7 @@ start.bat --no-browser  不自动打开浏览器
 
 A linear programming simplex tableau calculator for learning operations research. Enter a problem and it walks you through everything: problem-type classification, the standardization step, every simplex tableau, the formulas behind each iteration, and the final conclusion — so you can check your work against the textbook step by step.
 
-Written in pure Python standard library, no third-party packages needed; runs on Python 3.7+. Author: 一不错男子 · TimeLi.
+Written in pure Python standard library, no third-party packages needed; runs on Python 3.7+. Author: ANM-Yukang。https://github.com/ANM-Yukang · TimeLi。 https://github.com/Peter-Biship
 
 ## Quick Start
 

@@ -2,7 +2,7 @@
 
 一个给运筹学课程学习用的线性规划单纯形表计算器。把题目输进去，它会把题型判断、标准化过程、每一张单纯形表、每一步的计算公式一直到最终结论完整地展示出来，方便对照课本核对。（单纯性表计算来源于胡运权先生编写的运筹学教程）
 
-纯 Python 标准库实现，不用装任何第三方库，Python 3.7 以上都能跑。作者：ANM-Yukang · TimeLi。
+纯 Python 标准库实现，不用装任何第三方库，Python 3.7 以上都能跑。作者：ANM-Yukang。https://github.com/ANM-Yukang · TimeLi。 https://github.com/Peter-Biship
 
 ## 快速开始
 

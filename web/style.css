@@ -1,0 +1,1209 @@
+/* ============================================================
+ * style.css —— 单纯形法计算器【网页版】的页面样式（高级版）
+ *
+ * 设计思路：
+ *   所有颜色都写成"变量"（--xxx），浅色主题放在 :root，深色主题放在
+ *   html[data-theme="dark"] 里；网页上只要切换 <html data-theme> 就整体换肤。
+ *   卡片用"玻璃拟态"：半透明背景 + 毛玻璃模糊 + 柔和投影。
+ *   动画只用 CSS 做少量点缀（浮出、光晕、扫光），不写一句 JavaScript 动画。
+ *
+ * 目录：
+ *   0. 主题变量（浅色 / 深色）
+ *   1. 页面整体与背景
+ *   2. 顶部 Hero 标题区
+ *   3. 卡片与标题
+ *   4. 输入区（空档、下拉框、约束行）
+ *   5. 做题方法按钮（自动 / 手动）
+ *   6. 按钮与提示
+ *   7. 结果区（状态徽章、题目摘要、标准化说明）
+ *   8. 单纯形表
+ *   9. 判断 / 公式 / 结论
+ *  10. 最终答案高亮框
+ *  11. 动画 / 窄屏适配 / 减少动态效果
+ * ============================================================ */
+
+/* ---------- 0. 主题变量：浅色（默认） ---------- */
+:root {
+  color-scheme: light;
+
+  --text: #1f2937;                 /* 正文颜色 */
+  --muted: #64748b;                /* 次要文字 */
+  --heading: #1e3a8a;              /* 标题颜色 */
+  --accent: #4f46e5;               /* 主色（靛蓝） */
+  --accent-2: #0ea5e9;             /* 辅色（天蓝） */
+
+  --card-bg: rgba(255, 255, 255, 0.82);          /* 玻璃卡片背景 */
+  --card-border: rgba(255, 255, 255, 0.75);
+  --card-shadow: 0 18px 40px rgba(30, 58, 138, 0.10), 0 2px 8px rgba(30, 58, 138, 0.06);
+
+  --panel-bg: rgba(248, 250, 252, 0.88);         /* 浅色面板 */
+  --panel-border: #e2e8f0;
+  --code-bg: rgba(241, 245, 249, 0.92);
+
+  --input-bg: #ffffff;                            /* 输入框 */
+  --input-border: #cbd5e1;
+  --input-focus: rgba(79, 70, 229, 0.16);
+  --error-bg: #fef2f2;
+  --error-border: #fecaca;
+  --error-text: #991b1b;
+  --error-bar: #dc2626;
+  --input-error-bg: #fef2f2;
+
+  --table-border: #dbe3ee;                        /* 单纯形表配色 */
+  --table-head-bg: #eef2ff;
+  --table-cj-bg: #e0e7ff;
+  --table-cj-text: #4338ca;
+  --basis-bg: #dbeafe;                            /* 基变量列 */
+  --basis-text: #1d4ed8;
+  --enter-bg: #fef9c3;                            /* 入基列 */
+  --pivot-bg: #fde68a;                            /* 主元格子 */
+  --pivot-border: #dc2626;
+  --sigma-bg: #ecfdf5;                            /* σj 行 */
+  --sigma-text: #047857;
+  --leave-bg: #fff7ed;
+
+  --judge-bg: #fffbeb;                            /* 判断框 */
+  --judge-border: #fde68a;
+  --judge-text: #713f12;
+  --info-bg: #eff6ff;                             /* 标准化目标提示 */
+  --info-border: #93c5fd;
+  --info-text: #1e3a8a;
+
+  --answer-grad: linear-gradient(135deg, #022c22 0%, #065f46 45%, #059669 100%);
+  --answer-border: rgba(110, 231, 183, 0.4);
+  --answer-shadow: 0 24px 60px rgba(4, 120, 87, 0.35);
+  --warn-grad: linear-gradient(135deg, #451a03, #92400e 45%, #d97706 100%);
+  --warn-border: rgba(253, 186, 116, 0.4);
+  --warn-shadow: 0 24px 60px rgba(146, 64, 14, 0.35);
+
+  --scroll-thumb: #c7d2fe;
+}
+
+/* ---------- 0. 主题变量：深色（点"🌙 深色"按钮时启用） ---------- */
+html[data-theme="dark"] {
+  color-scheme: dark;
+
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --heading: #93c5fd;
+  --accent: #818cf8;
+  --accent-2: #22d3ee;
+
+  --card-bg: rgba(15, 23, 42, 0.74);
+  --card-border: rgba(148, 163, 184, 0.16);
+  --card-shadow: 0 18px 44px rgba(0, 0, 0, 0.45);
+
+  --panel-bg: rgba(30, 41, 59, 0.55);
+  --panel-border: rgba(148, 163, 184, 0.18);
+  --code-bg: rgba(30, 41, 59, 0.72);
+
+  --input-bg: #0f172a;
+  --input-border: #334155;
+  --input-focus: rgba(129, 140, 248, 0.25);
+  --error-bg: rgba(127, 29, 29, 0.28);
+  --error-border: rgba(248, 113, 113, 0.35);
+  --error-text: #fca5a5;
+  --error-bar: #ef4444;
+  --input-error-bg: rgba(127, 29, 29, 0.35);
+
+  --table-border: #334155;
+  --table-head-bg: #1e293b;
+  --table-cj-bg: #1e1b4b;
+  --table-cj-text: #a5b4fc;
+  --basis-bg: rgba(30, 64, 175, 0.35);
+  --basis-text: #93c5fd;
+  --enter-bg: rgba(250, 204, 21, 0.16);
+  --pivot-bg: rgba(245, 158, 11, 0.38);
+  --pivot-border: #f59e0b;
+  --sigma-bg: rgba(6, 78, 59, 0.4);
+  --sigma-text: #6ee7b7;
+  --leave-bg: rgba(194, 65, 12, 0.18);
+
+  --judge-bg: rgba(120, 53, 15, 0.25);
+  --judge-border: rgba(217, 119, 6, 0.45);
+  --judge-text: #fcd34d;
+  --info-bg: rgba(30, 58, 138, 0.3);
+  --info-border: rgba(96, 165, 250, 0.35);
+  --info-text: #bfdbfe;
+
+  --answer-grad: linear-gradient(135deg, #010f0b, #064e3b 45%, #047857);
+  --answer-border: rgba(52, 211, 153, 0.35);
+  --answer-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  --warn-grad: linear-gradient(135deg, #1c0a02, #78350f 45%, #b45309);
+  --warn-border: rgba(251, 191, 36, 0.35);
+  --warn-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+
+  --scroll-thumb: #475569;
+}
+
+/* ---------- 1. 页面整体与背景 ---------- */
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+  color: var(--text);
+  min-height: 100vh;
+  /* 三层柔和光斑 + 纵向渐变，做出"高级感"的底色 */
+  background:
+    radial-gradient(900px 480px at 6% -6%, rgba(99, 102, 241, 0.16), transparent 60%),
+    radial-gradient(760px 460px at 102% 6%, rgba(14, 165, 233, 0.15), transparent 60%),
+    radial-gradient(820px 520px at 50% 112%, rgba(168, 85, 247, 0.12), transparent 62%),
+    linear-gradient(180deg, #f8faff 0%, #eef2fb 100%);
+  background-attachment: fixed;
+}
+
+html[data-theme="dark"] body {
+  background:
+    radial-gradient(900px 480px at 6% -6%, rgba(99, 102, 241, 0.22), transparent 60%),
+    radial-gradient(760px 460px at 102% 6%, rgba(14, 165, 233, 0.18), transparent 60%),
+    radial-gradient(820px 520px at 50% 112%, rgba(168, 85, 247, 0.15), transparent 62%),
+    linear-gradient(180deg, #0b1220 0%, #0a0f1c 100%);
+}
+
+main {
+  max-width: 1120px;
+  margin: 26px auto 44px;
+  padding: 0 18px;
+}
+
+footer {
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  padding: 0 16px 30px;
+  letter-spacing: 0.3px;
+}
+
+.footer-note { margin: 0; }
+
+/* 页脚作者署名：渐变文字，点名字能跳到各自的 GitHub，低调但看得清 */
+.footer-signature {
+  margin: 8px 0 0;
+  font-size: 14px;
+}
+.footer-signature .sig-names {
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-decoration: none;                 /* 平时不加下划线，保持"低调" */
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+/* 悬停 / 键盘聚焦时给个明确反馈：名字底下出现主题色的下划线 */
+.footer-signature .sig-names:hover,
+.footer-signature .sig-names:focus-visible {
+  text-decoration: underline;
+  text-decoration-color: var(--accent);  /* 文字是透明的，下划线得单独给颜色才看得见 */
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.hidden { display: none !important; }
+
+/* ---------- 2. 顶部 Hero 标题区 ---------- */
+.hero {
+  position: relative;
+  overflow: hidden;
+  color: #ffffff;
+  /* 夜空底色：沿用原来的靛蓝→青蓝渐变，星星叠在上面显出来 */
+  background: linear-gradient(130deg, #1e1b4b 0%, #1e3a8a 45%, #0e7490 100%);
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.35);
+}
+
+/* 星空：容器只负责裁剪，三层星点各自是一张可无限平铺的"星图" */
+.hero-stars {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.star-layer {
+  position: absolute;
+  /* 四周各多留 70px：鼠标把星星平移出去时，边缘也不会露出空白 */
+  inset: -70px;
+  background-repeat: repeat;
+  /* 位移量 = 鼠标偏移量（app.js 写入的 --star-x / --star-y，约 -1 ~ 1）× 本层深度，
+     远层乘得小、近层乘得大，于是星星跟着鼠标"稍微动一点"而且有远近感 */
+  transform: translate3d(
+    calc(var(--star-x, 0) * var(--star-depth)),
+    calc(var(--star-y, 0) * var(--star-depth)),
+    0
+  );
+  will-change: transform;
+  animation: twinkle 6s ease-in-out infinite;
+}
+
+/* 远层：星点小、密、暗（数量最多的一层） */
+.star-far {
+  --star-depth: 7px;
+  background-image:
+    radial-gradient(1px 1px at 10px 16px, rgba(255, 255, 255, 0.75), transparent),
+    radial-gradient(1px 1px at 44px 7px, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 82px 32px, rgba(190, 220, 255, 0.7), transparent),
+    radial-gradient(1px 1px at 108px 70px, rgba(255, 255, 255, 0.45), transparent),
+    radial-gradient(1px 1px at 26px 56px, rgba(214, 200, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 62px 90px, rgba(255, 255, 255, 0.55), transparent),
+    radial-gradient(1px 1px at 96px 108px, rgba(190, 220, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 16px 102px, rgba(255, 255, 255, 0.4), transparent);
+  background-size: 120px 120px;
+  animation-duration: 5.5s;
+}
+
+/* 中层：稍大稍亮 */
+.star-mid {
+  --star-depth: 14px;
+  background-image:
+    radial-gradient(1.5px 1.5px at 30px 44px, rgba(255, 255, 255, 0.9), transparent),
+    radial-gradient(1.5px 1.5px at 128px 22px, rgba(198, 226, 255, 0.85), transparent),
+    radial-gradient(1.5px 1.5px at 86px 132px, rgba(255, 255, 255, 0.72), transparent),
+    radial-gradient(1.5px 1.5px at 166px 96px, rgba(224, 210, 255, 0.8), transparent),
+    radial-gradient(1.5px 1.5px at 52px 168px, rgba(255, 255, 255, 0.65), transparent),
+    radial-gradient(1.5px 1.5px at 148px 152px, rgba(190, 220, 255, 0.7), transparent),
+    radial-gradient(1.5px 1.5px at 8px 108px, rgba(255, 255, 255, 0.6), transparent);
+  background-size: 190px 190px;
+  animation-duration: 7s;
+  animation-delay: -2s;
+}
+
+/* 近层：又大又亮，带一点光晕，数量最少 */
+.star-near {
+  --star-depth: 24px;
+  background-image:
+    radial-gradient(2px 2px at 70px 84px, rgba(255, 255, 255, 0.95) 30%, rgba(160, 210, 255, 0.32) 55%, transparent 72%),
+    radial-gradient(2px 2px at 228px 46px, rgba(255, 255, 255, 0.9) 30%, rgba(200, 190, 255, 0.3) 55%, transparent 72%),
+    radial-gradient(2px 2px at 152px 220px, rgba(255, 255, 255, 0.85) 30%, rgba(150, 220, 240, 0.28) 55%, transparent 72%),
+    radial-gradient(2px 2px at 268px 158px, rgba(255, 255, 255, 0.88) 30%, rgba(190, 215, 255, 0.3) 55%, transparent 72%),
+    radial-gradient(2px 2px at 36px 246px, rgba(255, 255, 255, 0.8) 30%, rgba(210, 200, 255, 0.28) 55%, transparent 72%);
+  background-size: 300px 300px;
+  animation-duration: 8s;
+  animation-delay: -4s;
+}
+
+/* 两团呼吸的柔光（装饰） */
+.hero-glow {
+  position: absolute;
+  top: -220px;
+  right: -120px;
+  width: 560px;
+  height: 560px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.5), transparent 70%);
+  filter: blur(30px);
+  animation: drift 16s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+.hero-glow-2 {
+  top: auto;
+  right: auto;
+  bottom: -260px;
+  left: -140px;
+  width: 520px;
+  height: 520px;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.42), transparent 70%);
+  animation-duration: 20s;
+  animation-direction: alternate-reverse;
+}
+
+.hero-inner {
+  position: relative;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 60px 22px;              /* 上下留白加大：把标题区做得更高 */
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;         /* 标题（徽章 + 文字）在竖直方向居中 */
+}
+
+.hero-top {
+  display: flex;
+  flex-direction: column;      /* 居中排版：徽章、标题、按钮从上到下都居中 */
+  align-items: center;
+  text-align: center;
+  gap: 18px;
+}
+
+/* 居中排版：σ 徽章 + 标题横向一排，整体居中 */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.brand-badge {
+  width: 54px;
+  height: 54px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  font-size: 27px;
+  font-weight: 800;
+  font-family: Cambria, Georgia, "Times New Roman", serif;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 10px 24px rgba(2, 6, 23, 0.35);
+  backdrop-filter: blur(6px);
+}
+
+.brand h1 {
+  margin: 0;
+  font-size: 26px;
+  letter-spacing: 0.6px;
+  text-shadow: 0 2px 14px rgba(2, 6, 23, 0.35);
+}
+
+/* 右上角：主题 / 语言（中英双语）两个玻璃按钮 */
+/* 右上角两个按钮：绝对定位固定在角上，不占竖直空间，标题才能真正居中 */
+.hero-actions {
+  position: absolute;
+  top: 24px;
+  right: 22px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.ghost-button {
+  padding: 9px 18px;
+  font-size: 14px;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.13);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 999px;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+.ghost-button:hover {
+  background: rgba(255, 255, 255, 0.24);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(2, 6, 23, 0.3);
+}
+
+/* ---------- 3. 卡片与标题 ---------- */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  padding: 24px 26px;
+  margin-bottom: 26px;
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.card h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 18px;
+  font-size: 20px;
+  color: var(--heading);
+}
+
+/* 标题前的小竖条：渐变发光 */
+.card h2::before {
+  content: '';
+  width: 6px;
+  height: 24px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  box-shadow: 0 0 12px rgba(79, 70, 229, 0.45);
+}
+
+/* "填写题目"标题：渐变大字 + 发光下划线，做高级一点 */
+#input-card h2 {
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: 5px;
+  background: linear-gradient(120deg, var(--accent), var(--accent-2) 70%, #a855f7);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+#input-card h2::before { display: none; }      /* 去掉原来的小竖条 */
+#input-card h2::after {
+  content: '';
+  width: 74px;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  box-shadow: 0 0 14px rgba(79, 70, 229, 0.55);
+}
+
+.card h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 24px 0 10px;
+  font-size: 16px;
+  color: var(--heading);
+}
+.card h3::before { content: '◆'; font-size: 10px; color: var(--accent-2); }
+
+/* ---------- 4. 输入区 ---------- */
+.row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+/* "① 填写题目"这张卡片整体居中显示：标题、每一行、每条约束、提示文字都居中 */
+#input-card h2 { justify-content: center; }
+#input-card .row { justify-content: center; }
+#input-card .hint { text-align: center; }
+#error-box { text-align: center; }
+
+.row label { font-weight: 600; color: var(--text); font-size: 14px; }
+
+.obj-prefix { font-weight: 700; font-size: 16px; }
+
+/* 一行里排列 "空档 x1 + 空档 x2" 的横向条 */
+.input-strip { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
+
+.var-name { font-size: 16px; color: var(--text); margin-right: 6px; }
+.plus-sign { font-size: 16px; color: var(--muted); margin: 0 2px; }
+
+/* 数字空档输入框：聚焦时有光圈 */
+.num-input {
+  width: 78px;
+  padding: 8px 10px;
+  font-size: 15px;
+  text-align: center;
+  color: var(--text);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.05);
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+}
+.num-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--input-focus);
+  transform: translateY(-1px);
+}
+.num-input.invalid {
+  border-color: #dc2626;
+  background: var(--input-error-bg);
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.15);
+}
+
+/* 变量个数 / 约束条数 / 方法 / 例题 下拉框 */
+.small-select,
+.example-select {
+  padding: 8px 12px;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.small-select:focus,
+.example-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--input-focus);
+}
+.example-select { max-width: 330px; }
+
+/* 每条约束包成一张浅色小卡片，像一行"填空题"（内容居中） */
+.constraint-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 11px 14px;
+  margin: 9px 0;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+.constraint-row:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.12);
+}
+
+.con-label {
+  min-width: 66px;
+  padding: 6px 10px;
+  margin-right: 8px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+}
+
+/* 约束符号下拉框（≤ / ≥ / =） */
+.sign-select {
+  width: 62px;
+  padding: 8px 6px;
+  margin: 0 6px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--accent);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
+}
+
+/* ---------- 4·补、目标系数里的"λ 按钮" ---------- */
+/* 点一下就在光标处插入 λ（系数可以写成 1+λ、2-λ 这样的形式） */
+.lambda-key {
+  margin-left: 6px;
+  min-width: 42px;
+  padding: 8px 12px;
+  font-family: Cambria, Georgia, serif;
+  font-style: italic;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+}
+.lambda-key:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--input-focus);
+}
+.lambda-key:active { transform: translateY(1px) scale(0.97); }
+
+/* λ 按钮旁边的小注释：说明这个按钮是干什么的 */
+.lambda-note {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+/* 目标系数空档：里面可能写较长的式子（如 1+2λ），比普通空档宽一点 */
+.obj-slot { display: inline-flex; align-items: center; gap: 3px; }
+.obj-input { width: 92px; }
+
+/* 文字输入框（自己写题目） */
+.problem-textarea {
+  width: 100%;
+  min-height: 150px;
+  padding: 14px 16px;
+  font-family: Consolas, "Courier New", "Microsoft YaHei", monospace;
+  font-size: 14px;
+  line-height: 1.85;
+  color: var(--text);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  resize: vertical;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+.problem-textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--input-focus);
+}
+#text-input-wrap .hint { text-align: center; }
+
+/* ---------- 5. 做题方法按钮（自动 / 手动 分段控件） ---------- */
+.method-label { font-weight: 600; color: var(--text); font-size: 14px; }
+
+.method-toggle {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 7px;
+}
+
+.mode-button {
+  padding: 7px 18px;
+  font-size: 14px;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+}
+.mode-button:hover { color: var(--accent); }
+
+/* 选中的那个模式：渐变高亮 */
+.mode-button.active {
+  color: #ffffff;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  box-shadow: 0 5px 14px rgba(79, 70, 229, 0.35);
+}
+
+/* 被锁住的按钮（例如"含参数 λ"打开时不允许手动选方法） */
+.mode-button:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+.mode-button:disabled:hover { color: var(--muted); }
+
+#method-select:disabled { opacity: 0.5; cursor: not-allowed; }
+.method-hint { margin: 0; }
+
+/* ---------- 6. 按钮与提示 ---------- */
+.button-row { margin-top: 20px; }
+
+/* 主按钮：渐变 + 悬停时扫过一道高光 */
+.primary {
+  position: relative;
+  overflow: hidden;
+  padding: 12px 38px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(135deg, #4f46e5, #2563eb 55%, #06b6d4);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 12px 26px rgba(37, 99, 235, 0.38);
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+}
+.primary::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 45%;
+  height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.55s ease;
+  pointer-events: none;
+}
+.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px rgba(37, 99, 235, 0.48);
+}
+.primary:hover::after { left: 130%; }
+.primary:disabled { opacity: 0.6; cursor: wait; transform: none; }
+
+.hint { color: var(--muted); font-size: 13px; margin: 10px 0 0; }
+
+.error {
+  margin-top: 14px;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--error-text);
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
+  border-left: 5px solid var(--error-bar);
+  border-radius: 7px;
+}
+
+/* ---------- 7. 结果区 ---------- */
+.result-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+/* 状态徽章：小圆点 + 文字 */
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: #ffffff;
+  box-shadow: 0 8px 20px rgba(2, 6, 23, 0.25);
+}
+.status-chip::before {
+  content: '';
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.25);
+}
+.status-optimal { background: linear-gradient(135deg, #047857, #10b981); }
+.status-optimal::before { animation: pulse 2s ease-out infinite; }
+.status-unbounded { background: linear-gradient(135deg, #b45309, #f59e0b); }
+.status-infeasible { background: linear-gradient(135deg, #b91c1c, #ef4444); }
+.status-limit { background: linear-gradient(135deg, #334155, #64748b); }
+
+/* "跳到最终答案"做成小胶囊按钮 */
+.jump-link {
+  padding: 8px 16px;
+  font-size: 13.5px;
+  color: var(--accent);
+  text-decoration: none;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 999px;
+  transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+.jump-link:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(79, 70, 229, 0.15);
+}
+
+.summary-box {
+  padding: 16px 20px;
+  font-size: 15px;
+  line-height: 1.95;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+}
+.summary-box b { color: var(--heading); }
+
+.notes { margin: 6px 0 12px; padding-left: 22px; font-size: 14px; line-height: 1.85; color: var(--text); }
+
+.std-objective {
+  margin: 4px 0 0;
+  padding: 11px 15px;
+  font-size: 14px;
+  color: var(--info-text);
+  background: var(--info-bg);
+  border: 1px dashed var(--info-border);
+  border-radius: 7px;
+}
+
+/* ---------- 8. 单纯形表 ---------- */
+.tableau-card {
+  padding: 18px 20px;
+  margin: 18px 0;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: rise 0.45s ease both;      /* 出现时轻轻浮上来 */
+}
+
+/* 表头：编号徽章 + 标题 */
+.tableau-head { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+
+.tableau-badge {
+  min-width: 30px;
+  height: 30px;
+  padding: 0 9px;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  font-weight: 800;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  border-radius: 6px;
+  box-shadow: 0 6px 14px rgba(79, 70, 229, 0.35);
+}
+
+.tableau-title { font-size: 15px; font-weight: 700; color: var(--heading); }
+
+.tableau-caption { margin: 0 0 12px 42px; font-size: 13px; color: var(--muted); }
+
+/* 表格外面套一层圆角边框，太宽时可以横向滚动 */
+.tableau-scroll {
+  overflow: auto;
+  background: var(--input-bg);
+  border: 1px solid var(--table-border);
+  border-radius: 8px;
+}
+.tableau-scroll::-webkit-scrollbar { height: 10px; }
+.tableau-scroll::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 999px; }
+
+table.simplex-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 14px;
+}
+
+table.simplex-table th,
+table.simplex-table td {
+  border: 1px solid var(--table-border);
+  padding: 7px 14px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* 数字用等宽字体，上下对齐更整齐 */
+table.simplex-table .num {
+  font-family: Consolas, "Courier New", monospace;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+/* 第一行：cj → 各变量的目标系数 */
+table.simplex-table .row-cj td {
+  background: var(--table-cj-bg);
+  color: var(--table-cj-text);
+  font-weight: 700;
+}
+
+/* 第二行：cB xB b + 变量名 */
+table.simplex-table .row-head th {
+  background: var(--table-head-bg);
+  font-weight: 700;
+}
+
+/* 基变量列：淡蓝色（是单位列，方便和书上对照） */
+table.simplex-table .basis-mark { background: var(--basis-bg) !important; color: var(--basis-text); }
+table.simplex-table .basis-name { background: var(--basis-bg); color: var(--basis-text); font-weight: 700; }
+
+/* σj 检验数行：淡绿色 + 加粗 */
+table.simplex-table .row-sigma td,
+table.simplex-table .row-sigma th {
+  background: var(--sigma-bg);
+  color: var(--sigma-text);
+  font-weight: 700;
+}
+
+/* 入基列：黄色，一眼能看到下一步换哪个变量进基 */
+table.simplex-table .enter-col { background: var(--enter-bg) !important; }
+
+/* 主元格子：加深 + 红框 + 轻微发光 */
+table.simplex-table .pivot-cell {
+  background: var(--pivot-bg) !important;
+  border: 2px solid var(--pivot-border) !important;
+  font-weight: 800;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+
+/* 离基行浅浅标一下 */
+table.simplex-table td.leave-row { background: var(--leave-bg); }
+
+.row-label { font-size: 13px; color: var(--muted); background: var(--table-head-bg); }
+.corner { background: var(--table-head-bg); }
+
+.tableau-footer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 10px 0;
+  font-size: 14px;
+  font-family: Consolas, "Courier New", monospace;
+  color: var(--text);
+}
+
+/* 小徽章：入基列 / 退化表 */
+.chip {
+  display: inline-block;
+  padding: 3px 11px;
+  font-size: 12px;
+  border-radius: 999px;
+  font-family: inherit;
+}
+.chip-enter { color: #854d0e; background: rgba(250, 204, 21, 0.25); border: 1px solid rgba(250, 204, 21, 0.6); }
+.chip-warn { color: #9a3412; background: rgba(251, 146, 60, 0.18); border: 1px solid rgba(251, 146, 60, 0.55); }
+html[data-theme="dark"] .chip-enter { color: #fde68a; }
+html[data-theme="dark"] .chip-warn { color: #fdba74; }
+
+/* ---------- 8·补、参数 λ：区间分组的标题与结论 ---------- */
+.lambda-summary {
+  margin: 4px 0 16px;
+  padding: 11px 16px;
+  font-size: 14px;
+  color: var(--info-text);
+  background: var(--info-bg);
+  border: 1px dashed var(--info-border);
+  border-radius: 7px;
+}
+
+/* 每个区间的标题：渐变胶囊 */
+.interval-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 26px 0 8px;
+  padding: 10px 16px;
+  font-size: 15px;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  border-radius: 7px;
+  box-shadow: 0 8px 18px rgba(79, 70, 229, 0.28);
+}
+.interval-rep { font-size: 12.5px; font-weight: 400; opacity: 0.92; }
+
+/* 区间结论（最优解 + 最优值） */
+.interval-verdict {
+  margin: 10px 0 0;
+  padding: 11px 15px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.8;
+  color: var(--sigma-text);
+  background: var(--sigma-bg);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  border-radius: 7px;
+}
+.interval-verdict.unbounded {
+  color: var(--judge-text);
+  background: var(--judge-bg);
+  border-color: var(--judge-border);
+}
+.interval-endpoint { margin-top: 8px; font-size: 13px; line-height: 1.8; color: var(--muted); }
+
+/* ---------- 9. 判断 / 公式 / 结论 ---------- */
+.judgement {
+  padding: 11px 15px;
+  font-size: 14px;
+  line-height: 1.85;
+  color: var(--judge-text);
+  background: var(--judge-bg);
+  border: 1px solid var(--judge-border);
+  border-left: 5px solid var(--judge-border);
+  border-radius: 7px;
+  white-space: pre-wrap;
+}
+
+.phase-judgement { margin: 8px 0 14px; }
+
+.phase-title {
+  margin: 22px 0 8px;
+  padding: 9px 14px;
+  font-size: 16px;
+  color: #9a3412;
+  background: rgba(251, 146, 60, 0.12);
+  border-left: 5px solid #fb923c;
+  border-radius: 6px;
+}
+html[data-theme="dark"] .phase-title { color: #fdba74; }
+
+.phase-end { color: var(--muted); font-size: 14px; }
+
+/* 本表计算公式：折叠面板（点标题展开） */
+details.formulas {
+  margin-top: 12px;
+  overflow: hidden;
+  background: var(--code-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 7px;
+}
+details.formulas summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+details.formulas summary::-webkit-details-marker { display: none; }
+details.formulas summary::before {
+  content: '▸';
+  color: var(--accent-2);
+  transition: transform 0.2s;
+}
+details.formulas[open] summary::before { transform: rotate(90deg); }
+details.formulas[open] summary { border-bottom: 1px solid var(--panel-border); }
+
+details.formulas pre {
+  margin: 0;
+  padding: 14px 18px;
+  font-size: 13px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: Consolas, "Courier New", "Microsoft YaHei", monospace;
+  color: var(--text);
+}
+
+.conclusion-box {
+  padding: 16px 20px;
+  font-size: 14px;
+  line-height: 1.95;
+  color: var(--text);
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  white-space: pre-wrap;
+}
+
+/* ---------- 10. 最终答案高亮框 ---------- */
+.answer-box {
+  position: relative;
+  overflow: hidden;
+  margin: 28px 0 6px;
+  padding: 28px 32px;
+  color: #ffffff;
+  background: var(--answer-grad);
+  border: 1px solid var(--answer-border);
+  border-radius: 12px;
+  box-shadow: var(--answer-shadow);
+  scroll-margin-top: 24px;
+  animation: pop 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.15) both;
+}
+
+/* 左上角的柔光 */
+.answer-box::before {
+  content: '';
+  position: absolute;
+  top: -45%;
+  left: -8%;
+  width: 440px;
+  height: 440px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(52, 211, 153, 0.4), transparent 70%);
+  pointer-events: none;
+}
+
+/* 每隔几秒扫过一道高光 */
+.answer-box::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -70%;
+  width: 42%;
+  height: 100%;
+  background: linear-gradient(105deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+  transform: skewX(-18deg);
+  animation: shine 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.answer-box.warn { background: var(--warn-grad); border-color: var(--warn-border); box-shadow: var(--warn-shadow); }
+.answer-box.warn::before { background: radial-gradient(circle, rgba(251, 191, 36, 0.4), transparent 70%); }
+
+.answer-box > * { position: relative; z-index: 1; }   /* 内容浮在装饰层上面 */
+
+.answer-title { margin-bottom: 12px; font-size: 15px; font-weight: 700; letter-spacing: 1px; opacity: 0.95; }
+
+/* 最优解：x1 = ?、x2 = ? —— 大字显示 */
+.answer-solution {
+  margin-bottom: 10px;
+  font-size: 27px;
+  font-weight: 800;
+  font-family: Consolas, "Courier New", "Microsoft YaHei", monospace;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+/* 最优值：max z = ? —— 更大字号，放在半透明胶囊里 */
+.answer-value {
+  display: inline-block;
+  padding: 8px 24px;
+  font-size: 31px;
+  font-weight: 800;
+  font-family: Consolas, "Courier New", monospace;
+  letter-spacing: 1px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.answer-note { margin-top: 14px; font-size: 13px; line-height: 1.7; opacity: 0.95; }
+
+/* 参数 λ：分段答案（每个区间一行） */
+.answer-piece-note { margin-bottom: 10px; font-size: 13px; opacity: 0.92; }
+
+.answer-piece {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.25);
+}
+.answer-piece:last-child { border-bottom: none; }
+
+.answer-piece-range {
+  padding: 4px 13px;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 14px;
+  font-weight: 800;
+  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
+}
+
+.answer-piece-body {
+  font-family: Consolas, "Courier New", "Microsoft YaHei", monospace;
+  font-size: 16.5px;
+  font-weight: 600;
+  line-height: 1.7;
+}
+.answer-piece-unbounded { color: #fde68a; }
+
+/* ---------- 11. 动画 / 窄屏适配 / 减少动态效果 ---------- */
+
+/* 结果浮出 */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* 答案框弹出 */
+@keyframes pop {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* 状态小圆点呼吸 */
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.45); }
+  70% { box-shadow: 0 0 0 9px rgba(255, 255, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+}
+
+/* 答案框扫光 */
+@keyframes shine {
+  0% { left: -70%; }
+  55% { left: 130%; }
+  100% { left: 130%; }
+}
+
+/* Hero 柔光缓慢漂移 */
+@keyframes drift {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(-46px, 34px) scale(1.14); }
+}
+
+/* 星星明暗呼吸（很轻微，只做点缀，不抢标题） */
+@keyframes twinkle {
+  0%, 100% { opacity: 0.72; }
+  50% { opacity: 1; }
+}
+
+/* 系统设置里开了"减少动态效果"的话，就全部静态显示 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* 窄屏适配 */
+@media (max-width: 700px) {
+  .hero-inner { padding: 78px 16px 30px; min-height: 230px; }   /* 顶部留够空间给右上角按钮 */
+  .hero-actions { top: 16px; right: 16px; }
+  .brand h1 { font-size: 19px; }
+  .brand-badge { width: 44px; height: 44px; font-size: 22px; }
+  .card { padding: 18px 15px; }
+  .tableau-card { padding: 14px 12px; }
+  .tableau-caption { margin-left: 0; }
+  .answer-solution { font-size: 20px; }
+  .answer-value { font-size: 25px; }
+  .answer-box { padding: 22px 20px; }
+}

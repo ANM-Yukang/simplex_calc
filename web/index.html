@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<!--
+  index.html —— 单纯形法计算器【网页版】的页面骨架
+  说明：
+    - 顶部 Hero 标题区：星空背景 + 右上角"深色/浅色"和"中英双语"两个按钮，标题居中；
+      星空由 style.css 的 .hero-stars 画（三层星点），app.js 的 initStarParallax() 让它
+      跟着鼠标轻微平移，做出一点点远近感；
+    - 输入区有两种方式（由 app.js 切换）：
+        1) 表单填写：目标函数（max/min + 系数空档）、变量个数、约束条数、每条约束的系数空档 +
+           符号下拉框（≤ / ≥ / =）+ 右端项空档；
+           目标系数和右端项都可以写 λ（如 1+λ、8+λ），点右侧那颗 λ 按钮就把它插到
+           光标所在的空档里；
+        2) 文字输入：自己写题目（如 max z = 2x1 + 3x2; x1 + 2x2 <= 8），后台自动识别，
+           系数和右端项都可以含 λ（如 (1+λ)x1、x1 + x2 <= 8+λ）。
+    - 下面留一个结果区，由 app.js 填充：标准化说明、一张张单纯形表（λ 题按区间分组）、
+      结果讨论与结论、最后是带背景高亮的"最终答案"框。
+    - 页面上所有固定文字都带 data-i18n 标记，app.js 按当前语言统一替换。
+-->
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>单纯形法计算器 Simplex Calculator</title>
+  <!-- 页面样式：web/style.css -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ===== 顶部 Hero 标题区：右上角是主题/语言按钮，中间是居中的品牌标题 ===== -->
+  <header class="hero">
+    <div class="hero-glow"></div>              <!-- 右上角青蓝色柔光（纯装饰） -->
+    <div class="hero-glow hero-glow-2"></div>  <!-- 左下角紫色柔光（纯装饰） -->
+    <!-- 星空背景：三层星点叠在一起（远层小而密、近层大而亮），鼠标移动时整层轻微平移 -->
+    <div class="hero-stars" aria-hidden="true">
+      <span class="star-layer star-far"></span>
+      <span class="star-layer star-mid"></span>
+      <span class="star-layer star-near"></span>
+    </div>
+    <div class="hero-inner">
+      <!-- 右上角两个按钮：主题（深色/浅色）和语言（中英双语切换） -->
+      <div class="hero-actions">
+        <!-- 点击切换 深色 / 浅色 主题（按钮文字由 app.js 按当前语言和主题设置） -->
+        <button id="theme-button" class="ghost-button" type="button">🌙 深色</button>
+        <!-- 点击在中文 / 英文之间切换（中英双语按钮） -->
+        <button id="lang-button" class="ghost-button" type="button">🌐 English</button>
+      </div>
+      <div class="hero-top">
+        <div class="brand">
+          <span class="brand-badge">σ</span>   <!-- 品牌小徽章：σ 是单纯形表里的检验数符号 -->
+          <h1 data-i18n="pageTitle">单纯形法计算器</h1>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ===== 输入区 ===== -->
+    <section class="card" id="input-card">
+      <h2 data-i18n="inputTitle">填写题目</h2>
+
+      <!-- 输入方式：表单填写（空档 + 下拉框）或 文字输入（自己写题目，系统自动识别） -->
+      <div class="row inputmode-row">
+        <span class="method-label" data-i18n="inputModeLabel">输入方式</span>
+        <div class="method-toggle">
+          <button type="button" id="inputmode-form" class="mode-button active" data-i18n="inputModeForm">表单填写</button>
+          <button type="button" id="inputmode-text" class="mode-button" data-i18n="inputModeText">文字输入</button>
+        </div>
+      </div>
+
+      <!-- ===== 方式一：表单填写 ===== -->
+      <div id="form-inputs">
+        <!-- 目标函数：max / min + 每个变量的系数空档（由 app.js 动态生成）；
+             系数里可以直接写 λ（如 1+λ、2-λ） -->
+        <div class="row objective-row">
+          <label data-i18n="objectiveLabel" for="objective-type">目标函数</label>
+          <select id="objective-type" class="small-select">
+            <option value="max">max</option>
+            <option value="min">min</option>
+          </select>
+          <span class="obj-prefix">z =</span>
+          <div id="objective-inputs" class="input-strip"></div>
+          <!-- 全页唯一的一颗 λ 按钮：把 λ 插到光标所在的空档里（目标系数、约束系数或右端项都行） -->
+          <button type="button" id="lambda-key" class="lambda-key" title="插入 λ">λ</button>
+          <span class="lambda-note" data-i18n="lambdaNote">光标放到空档里，点一下插入 λ</span>
+        </div>
+
+        <!-- 变量个数 / 约束条数选择 -->
+        <div class="row count-row">
+          <label data-i18n="varCountLabel" for="var-count">变量个数</label>
+          <select id="var-count" class="small-select"></select>
+          <label data-i18n="conCountLabel" for="con-count">约束条数</label>
+          <select id="con-count" class="small-select"></select>
+        </div>
+
+        <!-- 约束条件：每行 = 系数空档 + 符号选择 + 右端项（由 app.js 动态生成）；
+             右端项也可以写含 λ 的式子（如 8+λ），用上面那颗 λ 按钮插到光标处就行 -->
+        <div id="constraints-box"></div>
+
+        <p class="hint" data-i18n="inputHint">每个空档填一个数字（3、-2、1.5、3/2 都行）；目标函数系数或约束右端项都可以含参数 λ（如 1+λ、8+λ）：把光标放到空档里，点 λ 按钮就能在光标处插入。</p>
+      </div>
+
+      <!-- ===== 方式二：文字输入（自己写题目，后台自动识别） ===== -->
+      <div id="text-input-wrap" class="hidden">
+        <textarea id="problem-text" class="problem-textarea" spellcheck="false" rows="8"></textarea>
+        <p class="hint" data-i18n="textHint">一行写一条：目标函数（max/min …）和每条约束（如 x1 + 2x2 <= 8）；系数可以写 (1+λ)x1，右端项也可以写 8+λ 这样的 λ 式子。</p>
+      </div>
+
+      <!-- 做题方法：默认"自动选择"（程序按题型自己判断）；
+           也可以点"手动选择"，再从下拉框里挑具体的单纯形法（两种输入方式共用） -->
+      <div class="row method-row">
+        <span class="method-label" data-i18n="methodLabel">做题方法</span>
+        <div class="method-toggle">
+          <button type="button" id="method-auto" class="mode-button active" data-i18n="methodAuto">自动选择</button>
+          <button type="button" id="method-manual" class="mode-button" data-i18n="methodManual">手动选择</button>
+        </div>
+        <select id="method-select" class="small-select" disabled></select>
+        <span class="hint method-hint" data-i18n="methodHint">不确定用哪个方法时就选“自动选择”，程序会按题型自动判断。</span>
+      </div>
+
+      <!-- 操作按钮：求解 / 载入例题 -->
+      <div class="row button-row">
+        <button id="solve-button" class="primary" type="button" data-i18n="solveButton">开始求解</button>
+        <label data-i18n="exampleLabel" for="example-select">例题：</label>
+        <select id="example-select" class="example-select"></select>
+      </div>
+
+      <!-- 出错提示（平时隐藏） -->
+      <div id="error-box" class="error hidden"></div>
+    </section>
+
+    <!-- ===== 结果区（由 app.js 填充内容） ===== -->
+    <section class="card hidden" id="result-card">
+      <h2 data-i18n="resultTitle">计算过程与最终答案</h2>
+      <div id="result-body"></div>
+    </section>
+  </main>
+
+  <!-- 页脚：一行说明文字（双语切换）+ 作者署名（固定不翻译） -->
+  <footer id="footer">
+    <p class="footer-note" data-i18n="footer">学习用途 · 计算核心与命令行版共用 simplex_core.py · 网页后台 web_app.py（纯 Python 标准库，无需安装第三方库）</p>
+    <!-- 后端 / 前端署名：名字做成可点击的链接，分别跳到各自的 GitHub（固定不翻译） -->
+    <p class="footer-signature">后端@<a class="sig-names" href="https://github.com/ANM-Yukang" target="_blank" rel="noopener noreferrer">ANM-Yukang</a> 前端@<a class="sig-names" href="https://github.com/Peter-Biship" target="_blank" rel="noopener noreferrer">TimeLi</a></p>
+  </footer>
+
+  <!-- 页面逻辑：web/app.js -->
+  <script src="app.js"></script>
+</body>
+</html>

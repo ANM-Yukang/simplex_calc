@@ -9,12 +9,12 @@
 ## 快速开始
 
 1. 装好 Python 3.7 以上；
-2. 双击 `start.bat`；
+2. 双击 `启动计算器.bat`；
 3. 浏览器会自动打开 http://127.0.0.1:8000/ ，填好题目点"开始求解"就行。
 
 想退出就关掉命令行窗口，或者在窗口里按 Ctrl+C。
 
-`start.bat` 会自动在电脑里找 Python（依次试 `python`、`py -3`、`python3`），一个都没找到会提示你先去装。也可以在命令行带参数运行：
+`启动计算器.bat` 会自动在电脑里找 Python（依次试 `python`、`py -3`、`python3`），一个都没找到会提示你先去装。也可以在命令行带参数运行：
 
 ```
 start.bat 8080          换端口（默认 8000，被占用的话自动往后换一个）
@@ -62,7 +62,7 @@ start.bat --no-browser  不自动打开浏览器
 
 ## 文件说明
 
-- `start.bat` —— 启动入口，双击它就行
+- `启动计算器.bat` —— 启动入口，双击它就行
 - `web_app.py` —— 网页版后台服务器
 - `web/` —— 网页版前端（index.html、style.css、app.js）
 - `simplex_core.py` —— 核心算法，网页版和命令行版共用
@@ -88,12 +88,12 @@ Written in pure Python standard library, no third-party packages needed; runs on
 ## Quick Start
 
 1. Install Python 3.7 or newer;
-2. Double-click `start.bat`;
+2. Double-click `启动计算器.bat`;
 3. Your browser opens http://127.0.0.1:8000/ automatically — fill in a problem and click "Solve".
 
 To quit, close the console window or press Ctrl+C in it.
 
-`start.bat` looks for Python on your own (`python`, then `py -3`, then `python3`) and tells you to install it if none is found. You can also pass arguments:
+`启动计算器.bat` looks for Python on your own (`python`, then `py -3`, then `python3`) and tells you to install it if none is found. You can also pass arguments:
 
 ```
 start.bat 8080          use another port (default 8000; if busy, the next free one is used)
@@ -141,7 +141,7 @@ The top-right corner has a Chinese / English switch (the process text switches t
 
 ## Files
 
-- `start.bat` — the launcher, just double-click it
+- `启动计算器.bat` — the launcher, just double-click it
 - `web_app.py` — web version backend server
 - `web/` — web version front end (index.html, style.css, app.js)
 - `simplex_core.py` — core algorithms, shared by the web and command-line versions
